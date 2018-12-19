@@ -15,7 +15,7 @@ function p0=beamform_das(data,fs,channel_width,n_channels,n_beams,sound_speed)
 % ABOUT:
 %       author               - Hengrong Lan (shanghaitech university)
 %       date                 - 2018.12.17
-%       last update          - 2018.12.18
+%       last update          - 2018.12.19
 %% ===================================================================
 
 
@@ -33,9 +33,11 @@ for j = 1:1:n_beams
 
 a10=(xd-bd(j));
 [a11 a12]=meshgrid(a10,x);
+deg = abs(atan(a11./a12));
+deg(1,j)=0;
+a11=a11.^2; % transducer positions
+a12=a12.^2; % focus depth positions
 
-a11=a11.^2;
-a12=a12.^2;
 delay = sqrt(a11 + a12)./sound_speed;   %y=x,指的是成像的深度与探头长度一致
 delay_ind =round(delay.*fs);  
 delay_ind = delay_ind+1;
@@ -43,7 +45,7 @@ delay_ind (delay_ind > waveform_length) =waveform_length;
 scan_line = zeros(1,n_beams);
 
 for i=1:1:n_channels
-   scan_line=scan_line+data(i,delay_ind(:,i));
+   scan_line=scan_line+data(i,delay_ind(:,i)).*cos(deg(:,i))';
 end
 image(:,j)=scan_line;
 end
